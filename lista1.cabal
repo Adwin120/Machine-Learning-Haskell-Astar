@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Dijkstra
   other-modules:
       Paths_lista1
   hs-source-dirs:
