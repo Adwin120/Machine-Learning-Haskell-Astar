@@ -3,8 +3,9 @@ module Dijkstra
     prevMapToPath,
     dijkstraPath,
     Vertex,
+    PrevMap,
     Arc,
-    Graph (Graphh)
+    Graph (Graphh),
   )
 where
 
@@ -13,19 +14,20 @@ import Data.HashMap.Lazy ((!), (!?))
 import qualified Data.HashMap.Lazy as Map
 import qualified Data.HashSet as Set
 import Data.List (minimumBy)
-import GHC.Real (infinity)
 
 import Connections ( Connection (to, from) )
 
+infinity :: Double
+infinity = read "Infinity"::Double
 type Vertex = String
 
 type Arc = Connection
 
-type WeightMap = Map.HashMap Vertex Rational
+type WeightMap = Map.HashMap Vertex Double
 
 type PrevMap = Map.HashMap Vertex Arc
 
-data Graph = Graphh (Map.HashMap Vertex [Arc]) (Arc -> Rational)
+data Graph = Graphh (Map.HashMap Vertex [Arc]) (PrevMap -> Arc -> Double)
 
 dijkstra :: Graph -> Vertex -> Vertex -> (WeightMap, PrevMap)
 dijkstra (Graphh edges arcWeight) start end =
@@ -47,17 +49,17 @@ dijkstra (Graphh edges arcWeight) start end =
         (altWeights, altPrevs) = unzip $ map mapsEntries $ filter destInQueue (edges ! u) where
           mapsEntries arc = ((to arc, altDestWeight arc), (to arc, arc))
           destInQueue connection = to connection `Set.member` nextQueue
-          altDestWeight arc = weight u + arcWeight arc
+          altDestWeight arc = weight u + arcWeight prevMap arc
 
         nextWeightMap = Map.unionWith min weightMap (Map.fromList altWeights)
         nextPrevMap = Map.union (Map.fromList altPrevs) prevMap
 
 
-prevMapToPath :: PrevMap -> Vertex -> [Vertex]
+prevMapToPath :: PrevMap -> Vertex -> [Arc]
 -- prevMapToPath prevMap end = end : (prevMap ! end) : prevMapToPath prevMap (prevMap ! end)
 prevMapToPath prevMap end = case prevMap !? end of
-    Just previous -> end : prevMapToPath prevMap (from previous)
-    Nothing -> [end]
+    Just previous -> previous : prevMapToPath prevMap (from previous)
+    Nothing -> []
 
-dijkstraPath :: Graph -> Vertex -> Vertex -> [Vertex]
+dijkstraPath :: Graph -> Vertex -> Vertex -> [Arc]
 dijkstraPath  graph start end = reverse $ (prevMapToPath $ snd $ dijkstra graph start end) end

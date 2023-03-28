@@ -24,9 +24,12 @@ dependencies:
 - unordered-containers
 - cassava
 - time
+- time-compat
 - bytestring
 - vector
 - text
+- hashable
+- PSQueue
 
 ghc-options:
 - -Wall
