@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module Connections (readConnectionCsv, Connection (..), timeDifference) where
+module Lista1.Connections (readConnectionCsv, Connection (..), timeDifference) where
 
 import Data.ByteString (toStrict)
 import qualified Data.ByteString.Lazy as BS

@@ -1,5 +1,6 @@
-module ConnectionDijkstra (connectionDijkstraPath, connectionDijkstra, connectionsTo) where
-import Connections (Connection (..), timeDifference)
+module Lista1.ConnectionDijkstra (connectionDijkstraPath, connectionDijkstra, connectionsTo) where
+
+import Lista1.Connections (Connection (..), timeDifference)
 import Data.HashMap.Lazy ((!), (!?))
 import qualified Data.HashMap.Lazy as Map
 import qualified Data.HashSet as Set
@@ -75,8 +76,8 @@ travelMapToPath :: Map.HashMap Connection Connection -> Set.HashSet Connection -
 travelMapToPath travelMap toEnd = go <$> (take 1 . Set.toList) (Map.keysSet travelMap `Set.intersection` toEnd) where
     go :: Connection -> [Connection]
     go end = case travelMap !? end of
-        Just previous -> previous : go previous
-        Nothing -> []
+        Just previous -> end : go previous
+        Nothing -> [end]
 
 
 
@@ -86,5 +87,6 @@ travelMapToPath travelMap toEnd = go <$> (take 1 . Set.toList) (Map.keysSet trav
 --     toEnd = connectionsTo connections end
 
 
-connectionDijkstraPath connections costF start end = Map.toList $ snd $ connectionDijkstra (connectionGraph connections costF) start toEnd where
+-- connectionDijkstraPath :: Vector Connection -> CostFunction -> Station -> String -> [[Connection]]
+connectionDijkstraPath connections costF start end = Map.toList (fst $ connectionDijkstra (connectionGraph connections costF) start toEnd) where
     toEnd = connectionsTo connections end

@@ -25,9 +25,14 @@ source-repository head
 
 library
   exposed-modules:
-      ConnectionDijkstra
-      Connections
-      Dijkstra
+      Lista1.AStar
+      Lista1.ConnectionDijkstra
+      Lista1.Connections
+      Lista1.Dijkstra
+      Lista1.Graph
+      Lista1.IO
+      Lista2.IO
+      Utils.TupleOperators
   other-modules:
       Paths_lista1
   hs-source-dirs:
@@ -39,6 +44,7 @@ library
     , bytestring
     , cassava
     , hashable
+    , heap
     , text
     , time
     , time-compat
@@ -59,6 +65,7 @@ executable lista1-exe
     , bytestring
     , cassava
     , hashable
+    , heap
     , lista1
     , text
     , time
@@ -81,6 +88,7 @@ test-suite lista1-test
     , bytestring
     , cassava
     , hashable
+    , heap
     , lista1
     , text
     , time
