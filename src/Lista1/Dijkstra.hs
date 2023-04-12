@@ -1,6 +1,6 @@
 module Lista1.Dijkstra
   ( dijkstra,
-    prevMapToPath,
+    travelMapToPath,
     dijkstraPath,
     Vertex,
     PrevMap,
@@ -14,52 +14,61 @@ import Data.HashMap.Lazy ((!), (!?))
 import qualified Data.HashMap.Lazy as Map
 import qualified Data.HashSet as Set
 import qualified Data.Heap as Heap
-import Data.List (minimumBy)
 
 import Lista1.Connections ( Connection (to, from) )
 import Lista1.Graph
-    ( Graph(..), PrevMap, WeightMap, Arc, Vertex, infinity )
+    ( Graph(..), PrevMap, WeightMap, Arc, Vertex, infinity, CostFunction )
 
-import Utils.TupleOperators ( (<:-:>), (<:-), (-:>) )
+import Utils.TupleOperators ( (<->) )
 import Data.Maybe (fromJust)
+import Data.List (minimumBy)
 
-identity :: a -> a
-identity = id
+minBy :: Ord b => (a -> b) -> a -> a -> a
+minBy f a b = minimumBy (compare `on` f) [a, b]
 
+type HeuristicFunction = Vertex -> Vertex -> Double
 
-
-dijkstra :: Graph -> Vertex -> Vertex -> (WeightMap, PrevMap)
-dijkstra (Graphh edges travelCost) start end =
-  go initQueue (initWeight, initPrev)
+aStar :: HeuristicFunction -> CostFunction -> Graph -> Vertex -> Vertex -> (WeightMap, PrevMap)
+aStar heuristic travelCost (Graphh edges) start end =
+  go initQueue (initWeightMap, initTravelMap)
   where
     initQueue = Heap.singleton (0, start)
-    initWeight = Map.singleton start 0
-    initPrev = Map.empty
+    initWeightMap = Map.singleton start 0
+    initTravelMap = Map.empty
     go :: Heap.MinPrioHeap Double Vertex -> (WeightMap, PrevMap) -> (WeightMap, PrevMap)
-    go queue maps@(weightMap, prevMap)
+    go queue maps@(weightMap, travelMap)
       | null queue = maps
       | Map.member end weightMap = maps
       | otherwise = go nextQueue (nextWeightMap, nextPrevMap)
       where
-        weight v = Map.findWithDefault infinity v weightMap
+        weight station = Map.findWithDefault infinity station weightMap + heuristic station end
         ((_, u), tailQueue) = fromJust $ Heap.view queue
+        weightAfterTravelWith connection = weight u + travelCost (travelMap !? from connection) connection
 
-        currentConnections = filter (not . (`Map.member` weightMap) . to) (edges ! u)
+        currentConnections = filter destinationNotVisited (edges ! u) where
+          destinationNotVisited = not . (`Map.member` weightMap) . to
 
-        altWeightMap = Map.fromList $ map (to <:-:> altWeight) currentConnections where
-          altWeight arc = weight u + travelCost (prevMap !? from arc) arc
-        altPrevMap = Map.fromList $ map (to <:-) currentConnections
+        altWeightMap = Map.fromListWith min $ map (to <-> weightAfterTravelWith) currentConnections
+        altPrevMap = Map.fromListWith (minBy weightAfterTravelWith) $ map (to <-> id) currentConnections
 
         nextWeightMap = Map.unionWith min weightMap altWeightMap
-        nextPrevMap = Map.union altPrevMap prevMap
+        nextPrevMap = Map.unionWith (minBy weightAfterTravelWith) altPrevMap travelMap
 
-        nextQueue = tailQueue `Heap.union` Heap.fromList (map (((nextWeightMap !) <:-) . to) currentConnections)
+        nextQueue = tailQueue `Heap.union` Heap.fromList (map (stationWithPriority . to) currentConnections) where
+          stationWithPriority station = (nextWeightMap ! station, station)
 
 
-prevMapToPath :: PrevMap -> Vertex -> [Arc]
-prevMapToPath prevMap end = case prevMap !? end of
-    Just previous -> previous : prevMapToPath prevMap (from previous)
+travelMapToPath :: PrevMap -> Vertex -> [Arc]
+travelMapToPath prevMap end = case prevMap !? end of
+    Just previous -> previous : travelMapToPath prevMap (from previous)
     Nothing -> []
 
-dijkstraPath :: Graph -> Vertex -> Vertex -> [Arc]
-dijkstraPath  graph start end = reverse $ (prevMapToPath $ snd $ dijkstra graph start end) end
+aStarPath :: HeuristicFunction -> CostFunction -> Graph -> Vertex -> Vertex -> [Arc]
+aStarPath heuristic costF graph start end = reverse $ travelMapToPath travelMap end where
+  travelMap = snd $ aStar heuristic costF graph start end
+
+dijkstra :: CostFunction -> Graph -> Vertex -> Vertex -> (WeightMap, PrevMap)
+dijkstra = aStar (\_connection -> const 1)
+
+dijkstraPath :: CostFunction -> Graph -> Vertex -> Vertex -> [Arc]
+dijkstraPath = aStarPath (\_connection -> const 1)

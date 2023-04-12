@@ -4,7 +4,8 @@ module Lista1.Graph (
     WeightMap,
     PrevMap,
     Graph (..),
-    infinity
+    infinity,
+    CostFunction
 ) where
 
 import qualified Data.HashMap.Lazy as Map
@@ -18,7 +19,9 @@ type WeightMap = Map.HashMap Vertex Double
 
 type PrevMap = Map.HashMap Vertex Arc
 
-data Graph = Graphh (Map.HashMap Vertex [Arc]) (Maybe Arc -> Arc -> Double)
+type CostFunction = (Maybe Arc -> Arc -> Double)
+
+data Graph = Graphh (Map.HashMap Vertex [Arc])
 
 infinity :: Double
 infinity = read "Infinity"::Double

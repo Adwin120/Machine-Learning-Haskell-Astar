@@ -25,7 +25,6 @@ source-repository head
 
 library
   exposed-modules:
-      Lista1.AStar
       Lista1.ConnectionDijkstra
       Lista1.Connections
       Lista1.Dijkstra

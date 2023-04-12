@@ -46,7 +46,7 @@ readCsvTime :: String -> TimeOfDay
 readCsvTime = parseTimeOrError True defaultTimeLocale "%H:%M:%S"
 
 timeDifference :: TimeOfDay -> TimeOfDay -> Integer
-timeDifference = (-) `on` (`div` (1 ^ 12)) . diffTimeToPicoseconds . timeOfDayToTime
+timeDifference = (-) `on` (`div` (10 ^ 12)) . diffTimeToPicoseconds . timeOfDayToTime
 
 readCsvFile :: FilePath -> IO (Vector (Vector BS.ByteString))
 readCsvFile path = fromRight empty . decode HasHeader <$> BS.readFile path
