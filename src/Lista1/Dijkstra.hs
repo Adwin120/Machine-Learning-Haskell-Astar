@@ -2,22 +2,25 @@ module Lista1.Dijkstra
   ( dijkstra,
     travelMapToPath,
     dijkstraPath,
+    aStar,
+    aStarPath,
     Vertex,
     PrevMap,
+    Graph,
     Arc,
-    Graph (Graphh),
+    HeuristicFunction
   )
 where
 
 import Data.Function (on)
 import Data.HashMap.Lazy ((!), (!?))
 import qualified Data.HashMap.Lazy as Map
-import qualified Data.HashSet as Set
+-- import qualified Data.HashSet as Set
 import qualified Data.Heap as Heap
 
 import Lista1.Connections ( Connection (to, from) )
 import Lista1.Graph
-    ( Graph(..), PrevMap, WeightMap, Arc, Vertex, infinity, CostFunction )
+    ( Graph, PrevMap, WeightMap, Arc, Vertex, infinity, CostFunction )
 
 import Utils.TupleOperators ( (<->) )
 import Data.Maybe (fromJust)
@@ -29,7 +32,7 @@ minBy f a b = minimumBy (compare `on` f) [a, b]
 type HeuristicFunction = Vertex -> Vertex -> Double
 
 aStar :: HeuristicFunction -> CostFunction -> Graph -> Vertex -> Vertex -> (WeightMap, PrevMap)
-aStar heuristic travelCost (Graphh edges) start end =
+aStar heuristic travelCost edges start end =
   go initQueue (initWeightMap, initTravelMap)
   where
     initQueue = Heap.singleton (0, start)
@@ -41,11 +44,15 @@ aStar heuristic travelCost (Graphh edges) start end =
       | Map.member end weightMap = maps
       | otherwise = go nextQueue (nextWeightMap, nextPrevMap)
       where
-        weight station = Map.findWithDefault infinity station weightMap + heuristic station end
+        weight station = Map.findWithDefault infinity station weightMap
         ((_, u), tailQueue) = fromJust $ Heap.view queue
-        weightAfterTravelWith connection = weight u + travelCost (travelMap !? from connection) connection
+        
+        weightAfterTravelWith connection =
+          weight u
+          + travelCost (travelMap !? from connection) connection
+          + heuristic (to connection) end
 
-        currentConnections = filter destinationNotVisited (edges ! u) where
+        currentConnections = filter destinationNotVisited (Map.findWithDefault [] u edges) where
           destinationNotVisited = not . (`Map.member` weightMap) . to
 
         altWeightMap = Map.fromListWith min $ map (to <-> weightAfterTravelWith) currentConnections

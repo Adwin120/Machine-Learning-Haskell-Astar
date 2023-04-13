@@ -1,4 +1,4 @@
-module Lista2.IO where
+module Lista2.IO (main) where
 
 
 main :: IO()

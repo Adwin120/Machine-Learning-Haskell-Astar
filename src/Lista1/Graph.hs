@@ -3,15 +3,15 @@ module Lista1.Graph (
     Arc,
     WeightMap,
     PrevMap,
-    Graph (..),
+    Graph,
     infinity,
     CostFunction
 ) where
 
 import qualified Data.HashMap.Lazy as Map
-import Lista1.Connections ( Connection )
+import Lista1.Connections ( Connection, Station )
 
-type Vertex = String
+type Vertex = Station
 
 type Arc = Connection
 
@@ -21,7 +21,7 @@ type PrevMap = Map.HashMap Vertex Arc
 
 type CostFunction = (Maybe Arc -> Arc -> Double)
 
-data Graph = Graphh (Map.HashMap Vertex [Arc])
+type Graph = Map.HashMap Vertex [Arc]
 
 infinity :: Double
 infinity = read "Infinity"::Double
