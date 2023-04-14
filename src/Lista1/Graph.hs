@@ -9,9 +9,9 @@ module Lista1.Graph (
 ) where
 
 import qualified Data.HashMap.Lazy as Map
-import Lista1.Connections ( Connection, Station )
+import Lista1.Connections ( Connection )
 
-type Vertex = Station
+type Vertex = String
 
 type Arc = Connection
 

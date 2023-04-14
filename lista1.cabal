@@ -29,6 +29,7 @@ library
       Lista1.Dijkstra
       Lista1.Graph
       Lista1.IO
+      Lista1.TabuSearch
       Lista2.IO
       Utils.TupleOperators
   other-modules:
@@ -43,6 +44,7 @@ library
     , cassava
     , hashable
     , heap
+    , split
     , text
     , time
     , time-compat
@@ -65,6 +67,7 @@ executable lista1-exe
     , hashable
     , heap
     , lista1
+    , split
     , text
     , time
     , time-compat
@@ -88,6 +91,7 @@ test-suite lista1-test
     , hashable
     , heap
     , lista1
+    , split
     , text
     , time
     , time-compat

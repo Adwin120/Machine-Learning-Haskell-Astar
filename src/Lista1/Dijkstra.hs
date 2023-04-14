@@ -4,6 +4,7 @@ module Lista1.Dijkstra
     dijkstraPath,
     aStar,
     aStarPath,
+    aStarCost,
     Vertex,
     PrevMap,
     Graph,
@@ -12,7 +13,6 @@ module Lista1.Dijkstra
   )
 where
 
-import Data.Function (on)
 import Data.HashMap.Lazy ((!), (!?))
 import qualified Data.HashMap.Lazy as Map
 -- import qualified Data.HashSet as Set
@@ -22,12 +22,8 @@ import Lista1.Connections ( Connection (to, from) )
 import Lista1.Graph
     ( Graph, PrevMap, WeightMap, Arc, Vertex, infinity, CostFunction )
 
-import Utils.TupleOperators ( (<->) )
+import Utils.TupleOperators ( (<->), minBy )
 import Data.Maybe (fromJust)
-import Data.List (minimumBy)
-
-minBy :: Ord b => (a -> b) -> a -> a -> a
-minBy f a b = minimumBy (compare `on` f) [a, b]
 
 type HeuristicFunction = Vertex -> Vertex -> Double
 
@@ -46,7 +42,7 @@ aStar heuristic travelCost edges start end =
       where
         weight station = Map.findWithDefault infinity station weightMap
         ((_, u), tailQueue) = fromJust $ Heap.view queue
-        
+
         weightAfterTravelWith connection =
           weight u
           + travelCost (travelMap !? from connection) connection
@@ -69,6 +65,9 @@ travelMapToPath :: PrevMap -> Vertex -> [Arc]
 travelMapToPath prevMap end = case prevMap !? end of
     Just previous -> previous : travelMapToPath prevMap (from previous)
     Nothing -> []
+
+aStarCost :: HeuristicFunction -> CostFunction -> Graph -> Vertex -> Vertex -> Double
+aStarCost heuristic costF graph start end =  fst (aStar heuristic costF graph start end) ! end
 
 aStarPath :: HeuristicFunction -> CostFunction -> Graph -> Vertex -> Vertex -> [Arc]
 aStarPath heuristic costF graph start end = reverse $ travelMapToPath travelMap end where

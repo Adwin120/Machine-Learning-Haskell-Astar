@@ -29,8 +29,8 @@ dependencies:
 - vector
 - text
 - hashable
-- PSQueue
 - heap
+- split
 
 ghc-options:
 - -Wall
